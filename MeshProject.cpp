@@ -497,17 +497,18 @@ class TriangleMesh {
             meshFloat_t angle2 = calculateAngleBetweenVectors(vec3, vec4);
             meshFloat_t angle3 = M_PI - angle1 - angle2;
 
-            if ((angle1 > M_PI / 2 || angle2 > M_PI / 2 || angle3 > M_PI / 2) &&
+            constexpr meshFloat_t right_angle = M_PI / 2.0;
+            if ((angle1 > right_angle || angle2 > right_angle || angle3 > right_angle) &&
                 (angle1 < angleRad || angle2 < angleRad || angle3 < angleRad)) {
                 // Determine which edge to flip
                 if (angle1 < angleRad) {
-                    tryDiagonalEdgeSwap(face.v1, face.v2, face.v3);
+                    tryDiagonalEdgeSwap(face.v1, face.v2, face.v3, faceIndex);
                 }
                 if (angle2 < angleRad) {
-                    tryDiagonalEdgeSwap(face.v2, face.v3, face.v1);
+                    tryDiagonalEdgeSwap(face.v2, face.v3, face.v1, faceIndex);
                 }
                 if (angle3 < angleRad) {
-                    tryDiagonalEdgeSwap(face.v3, face.v1, face.v2);
+                    tryDiagonalEdgeSwap(face.v3, face.v1, face.v2, faceIndex);
                 }
             }
         }
@@ -583,7 +584,7 @@ class TriangleMesh {
         }
     }
 
-    void tryDiagonalEdgeSwap(meshInt_t v1, meshInt_t v2, meshInt_t v3) {
+    void tryDiagonalEdgeSwap(meshInt_t v1, meshInt_t v2, meshInt_t v3, meshInt_t faceIndex) {
         // Find the adjacent face sharing the edge (v1, v2)
         meshInt_t adjacentFaceIndex;
         bool found = false;
@@ -612,19 +613,19 @@ class TriangleMesh {
 
         // Perform the edge swap: replace edge (v1, v2) with (v3, oppositeVertex)
         faces[adjacentFaceIndex] = {v1, v3, oppositeVertex};
-        faces[faces.size() - 1] = {v2, v3, oppositeVertex};  // Last face was swapped
+        faces[faceIndex] = {v2, v3, oppositeVertex}; 
 
-        // Remove the degenerate triangle if created
-        if (faces[adjacentFaceIndex].v1 == faces[adjacentFaceIndex].v2 ||
-            faces[adjacentFaceIndex].v2 == faces[adjacentFaceIndex].v3 ||
-            faces[adjacentFaceIndex].v3 == faces[adjacentFaceIndex].v1) {
-            faces.erase(faces.begin() + adjacentFaceIndex);
-        }
-        if (faces[faces.size() - 1].v1 == faces[faces.size() - 1].v2 ||
-            faces[faces.size() - 1].v2 == faces[faces.size() - 1].v3 ||
-            faces[faces.size() - 1].v3 == faces[faces.size() - 1].v1) {
-            faces.pop_back();
-        }
+        // // Remove the degenerate triangle if created
+        // if (faces[adjacentFaceIndex].v1 == faces[adjacentFaceIndex].v2 ||
+        //     faces[adjacentFaceIndex].v2 == faces[adjacentFaceIndex].v3 ||
+        //     faces[adjacentFaceIndex].v3 == faces[adjacentFaceIndex].v1) {
+        //     faces.erase(faces.begin() + adjacentFaceIndex);
+        // }
+        // if (faces[faceIndex].v1 == faces[faceIndex].v2 ||
+        //     faces[faceIndex].v2 == faces[faceIndex].v3 ||
+        //     faces[faceIndex].v3 == faces[faceIndex].v1) {
+        //     faces.pop_back();
+        // }
     }
 };
 
@@ -652,7 +653,7 @@ int main() {
     mesh.collapseEdges(0.0001);
 
 
-    // mesh.doDiagonalEdgeSwaps(90);
+    mesh.doDiagonalEdgeSwaps(90);
     mesh.writeOBJ("myOBJ.obj");
 
     return 0;
