@@ -589,6 +589,8 @@ class TriangleMesh {
         meshInt_t adjacentFaceIndex;
         bool found = false;
         for (size_t i = 0; i < faces.size(); ++i) {
+            if (faceIndex == i)
+                continue;
             const auto& face = faces[i];
             if ((face.v1 == v1 && face.v2 == v2) || (face.v1 == v2 && face.v2 == v1) ||
                 (face.v1 == v2 && face.v2 == v3) || (face.v1 == v3 && face.v2 == v2) ||
@@ -603,6 +605,8 @@ class TriangleMesh {
             return;  // No adjacent face
         }
 
+        std::cout << "indices: " << faceIndex << " " << adjacentFaceIndex << std::endl;
+
         const auto& adjFace = faces[adjacentFaceIndex];
         meshInt_t sharedVertex = (adjFace.v1 == v1 || adjFace.v1 == v2)   ? adjFace.v1
                                  : (adjFace.v2 == v1 || adjFace.v2 == v2) ? adjFace.v2
@@ -613,19 +617,7 @@ class TriangleMesh {
 
         // Perform the edge swap: replace edge (v1, v2) with (v3, oppositeVertex)
         faces[adjacentFaceIndex] = {v1, v3, oppositeVertex};
-        faces[faceIndex] = {v2, v3, oppositeVertex}; 
-
-        // // Remove the degenerate triangle if created
-        // if (faces[adjacentFaceIndex].v1 == faces[adjacentFaceIndex].v2 ||
-        //     faces[adjacentFaceIndex].v2 == faces[adjacentFaceIndex].v3 ||
-        //     faces[adjacentFaceIndex].v3 == faces[adjacentFaceIndex].v1) {
-        //     faces.erase(faces.begin() + adjacentFaceIndex);
-        // }
-        // if (faces[faceIndex].v1 == faces[faceIndex].v2 ||
-        //     faces[faceIndex].v2 == faces[faceIndex].v3 ||
-        //     faces[faceIndex].v3 == faces[faceIndex].v1) {
-        //     faces.pop_back();
-        // }
+        faces[faceIndex] = {v2, v3, oppositeVertex};
     }
 };
 
@@ -648,10 +640,7 @@ int main() {
     }
     std::cout << "\n";
 
-
-
     mesh.collapseEdges(0.0001);
-
 
     mesh.doDiagonalEdgeSwaps(90);
     mesh.writeOBJ("myOBJ.obj");
