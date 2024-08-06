@@ -647,7 +647,12 @@ int main() {
     }
     std::cout << "\n";
 
-    mesh.doDiagonalEdgeSwaps(90);
+
+
+    mesh.collapseEdges(0.0001);
+
+
+    // mesh.doDiagonalEdgeSwaps(90);
     mesh.writeOBJ("myOBJ.obj");
 
     return 0;
