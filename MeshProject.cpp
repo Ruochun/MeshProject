@@ -277,6 +277,8 @@ class TriangleMesh {
                 // Find shared edge
                 meshInt_t sharedVertices = 0;
                 int shared1 = -1, shared2 = -1;
+
+                bool jump = true;
                 if (currentFace.v1 == adjFace.v1 || currentFace.v1 == adjFace.v2 || currentFace.v1 == adjFace.v3)
                     sharedVertices++, shared1 = currentFace.v1;
                 if (currentFace.v2 == adjFace.v1 || currentFace.v2 == adjFace.v2 || currentFace.v2 == adjFace.v3) {
@@ -293,9 +295,13 @@ class TriangleMesh {
                     } else {
                         shared1 = currentFace.v3;
                     }
-                    sharedVertices++;
                 }
+                if (currentFace.v1 == adjFace.v2 || currentFace.v2 == adjFace.v2 || currentFace.v3 == adjFace.v2)
+                    jump = false;
 
+                // std::cout << "currentFace1: " << currentFace.v1 << std::endl;
+                // std::cout << "currentFace2: " << currentFace.v2 << std::endl;
+                // std::cout << "currentFace3: " << currentFace.v3 << std::endl;
                 // std::cout << "Shared1: " << shared1 << std::endl;
                 // std::cout << "Shared2: " << shared2 << std::endl;
 
@@ -303,11 +309,15 @@ class TriangleMesh {
                 if ((currentFace.v1 == shared1 && currentFace.v2 == shared2) ||
                     (currentFace.v2 == shared1 && currentFace.v3 == shared2) ||
                     (currentFace.v3 == shared1 && currentFace.v1 == shared2)) {
-                    // If shared edge is in same order
-                    // nothing
+                    if (!jump) {
+                        flag = false;
+                        break;
+                    }
                 } else {
-                    flag = false;
-                    break;
+                    if (jump) {
+                        flag = false;
+                        break;
+                    }
                 }
 
                 visitedFaces.insert(adjFaceIndex);
